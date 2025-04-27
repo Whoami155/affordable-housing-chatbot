@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Chatbot</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="chat-container">
+    <h1>3D Chatbot</h1>
+
+    <div class="chat-box" id="chat-box"></div>
+
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Ask me something..." />
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="startListening()">🎤</button>
+    </div>
+
+    <!-- 3D Model Container (initially hidden) -->
+    <div id="model-container" class="hidden" style="margin-top: 20px;">
+      <model-viewer src="/static/model.glb" alt="3D model" auto-rotate camera-controls style="width: 100%; height: 400px;"></model-viewer>
+    </div>
+  </div>
+
+  <!-- Google Model Viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <script>
+    function addMessage(text, isUser = false) {
+      const message = document.createElement("div");
+      message.className = "message " + (isUser ? "user-message" : "bot-message");
+      message.textContent = text;
+      document.getElementById("chat-box").appendChild(message);
+      document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+      addMessage(message, true);
+      input.value = "";
+
+      // Initially hide the 3D model container
+      document.getElementById("model-container").classList.add("hidden");
+
+      fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        addMessage(data.response, false);
+
+        // Show the model if needed
+        if (data.show_model) {
+          document.getElementById("model-container").classList.remove("hidden");
+        }
+      })
+      .catch(err => addMessage("Error talking to server", false));
+    }
+
+    // 🎤 Speech to Text
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.start();
+      recognition.onresult = function (event) {
+        document.getElementById("user-input").value = event.results[0][0].transcript;
+        sendMessage();
+      };
+    }
+  </script>
+</body>
+</html>
+
