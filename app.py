@@ -50,7 +50,7 @@ def chat():
         return jsonify({"response": reply, "show_model": False})
 
     except Exception as e:
-        print("[ERROR]", str(e))
+        print("currently backend not deployed this is a prototype of frontend. check the backend in app.py")
         traceback.print_exc()
         if res is not None:
             print("[RAW RESPONSE]", res.text)
