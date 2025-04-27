@@ -52,7 +52,8 @@
       })
       .then(res => res.json())
       .then(data => {
-        addMessage(data.response, false);
+       // addMessage(data.response, false);
+        addMessage("currently backend not deployed this is a prototype of frontend. check the backend in app.py",false);
 
         // Show the model if needed
         if (data.show_model) {
